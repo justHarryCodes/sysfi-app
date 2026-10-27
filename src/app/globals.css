@@ -1,0 +1,398 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Theme tokens — a 1:1 port of crypto-wallet/constants/Theme.js. Keep the
+   two in sync; names match the app's COLORS keys (kebab-cased).
+
+   Brand: logo mint green (primary) + logo blue (secondary) + logo purple
+   (tertiary). --brand-gradient follows the logo's green → cyan → blue →
+   purple sweep.
+
+   PAIRING RULES (same as the app): on a colored background always use its
+   matching on-* token for text, never another accent shade.
+     bg-primary → text-on-primary, bg-primary-light → text-on-primary-light,
+     bg-secondary → text-on-secondary, bg-tertiary → text-on-tertiary,
+     surface/card/background → text-text / text-text-secondary,
+     disabled → bg-disabled-bg + text-disabled-text.
+   Dark is the brand default; light applies only when explicitly chosen (or
+   via "system" on a light OS) — see ThemeContext.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: #0a0a0a;
+  --surface: #0e1210;
+  --card: #161b19;
+
+  --text: #ffffff;
+  --text-secondary: #b3b3b3;
+  --text-tertiary: #808080;
+
+  --primary: #22f595;
+  --primary-dark: #14b873;
+  --primary-light: #07261b;
+
+  --secondary: #3d8bff;
+  --tertiary: #7a3cff;
+
+  --on-primary: #000000;
+  --on-primary-dark: #000000;
+  --on-primary-light: #22f595;
+  --on-secondary: #000000;
+  --on-tertiary: #ffffff;
+
+  --disabled-bg: #2a2a2a;
+  --disabled-text: #8c8c8c;
+  --disabled-border: #333333;
+
+  --success: #b8b8b8;
+  --error: #ffffff;
+  --warning: #8c8c8c;
+  /* Market colours — the app theme keeps status colours monochrome, but
+     buy/sell, gains/losses and vote options need to read at a glance. */
+  --up: #22c55e;
+  --down: #f43f5e;
+  --neutral: #f59e0b;
+  --info: #737373;
+
+  --border: #232b27;
+  --divider: #232b27;
+
+  /* Logo gradient (same in both themes) */
+  --brand-gradient: linear-gradient(
+    135deg,
+    #26f594 0%,
+    #0fd9d6 35%,
+    #3aa8ff 68%,
+    #5b14f5 100%
+  );
+
+  /* Frosted tab bar (AppNavigator.makeTabOptions) */
+  --glass-tint: rgba(8, 14, 12, 0.42);
+  --glass-hairline: rgba(255, 255, 255, 0.28);
+  --glass-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 28%,
+    rgba(0, 0, 0, 0) 100%
+  );
+
+  /* Desktop glass panels (web-only extension of the app's frosted bar) */
+  --panel-bg: rgba(16, 22, 19, 0.52);
+  --panel-bg-strong: rgba(12, 17, 15, 0.86);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --panel-highlight: rgba(255, 255, 255, 0.07);
+  --panel-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
+  --hover: rgba(255, 255, 255, 0.06);
+  --ambient-1: rgba(34, 245, 149, 0.16);
+  --ambient-2: rgba(61, 139, 255, 0.09);
+  --ambient-3: rgba(122, 60, 255, 0.07);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --background: #ffffff;
+  --surface: #f5f7f6;
+  --card: #ffffff;
+
+  --text: #000000;
+  --text-secondary: #5c5c5c;
+  --text-tertiary: #707070;
+
+  --primary: #12c97d;
+  --primary-dark: #0e9f62;
+  --primary-light: #ddfbee;
+
+  --secondary: #2f6feb;
+  --tertiary: #5b14f5;
+
+  --on-primary: #000000;
+  --on-primary-dark: #000000;
+  --on-primary-light: #000000;
+  --on-secondary: #ffffff;
+  --on-tertiary: #ffffff;
+
+  --disabled-bg: #e0e0e0;
+  --disabled-text: #6b6b6b;
+  --disabled-border: #d0d0d0;
+
+  --success: #3d3d3d;
+  --error: #000000;
+  --warning: #707070;
+  --up: #16a34a;
+  --down: #e11d48;
+  --neutral: #d97706;
+  --info: #707070;
+
+  --border: #e0e0e0;
+  --divider: #eeeeee;
+
+  --brand-gradient: linear-gradient(
+    135deg,
+    #26f594 0%,
+    #0fd9d6 35%,
+    #3aa8ff 68%,
+    #5b14f5 100%
+  );
+
+  --glass-tint: rgba(245, 250, 248, 0.38);
+  --glass-hairline: rgba(255, 255, 255, 1);
+  --glass-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.18) 28%,
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  --panel-bg: rgba(255, 255, 255, 0.62);
+  --panel-bg-strong: rgba(255, 255, 255, 0.9);
+  --panel-border: rgba(0, 0, 0, 0.07);
+  --panel-highlight: rgba(255, 255, 255, 0.95);
+  --panel-shadow: 0 24px 60px -28px rgba(0, 40, 25, 0.22);
+  --hover: rgba(0, 0, 0, 0.045);
+  --ambient-1: rgba(18, 201, 125, 0.22);
+  --ambient-2: rgba(47, 111, 235, 0.12);
+  --ambient-3: rgba(91, 20, 245, 0.07);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
+  --color-on-primary: var(--on-primary);
+  --color-on-primary-dark: var(--on-primary-dark);
+  --color-on-primary-light: var(--on-primary-light);
+  --color-on-secondary: var(--on-secondary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-disabled-bg: var(--disabled-bg);
+  --color-disabled-text: var(--disabled-text);
+  --color-disabled-border: var(--disabled-border);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-neutral: var(--neutral);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-divider: var(--divider);
+  --color-hover: var(--hover);
+  --color-panel-border: var(--panel-border);
+
+  /* FONTS — the app uses the platform system font everywhere */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@theme {
+  /* FONTS.sizes */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-xxl: 28px;
+  --text-xxxl: 34px;
+
+  /* BORDER_RADIUS */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 22px;
+  --radius-sheet: 28px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .hairline-b {
+    border-bottom: 0.5px solid var(--divider);
+  }
+  .hairline-t {
+    border-top: 0.5px solid var(--divider);
+  }
+  .glass {
+    background: var(--glass-sheen), var(--glass-tint);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  /* Logo gradient helpers */
+  .bg-brand-gradient {
+    background-image: var(--brand-gradient);
+  }
+  .text-brand-gradient {
+    background-image: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+
+/* Floating frosted panel (desktop shell, widgets) — @utility so variants
+   like md:glass-panel work. */
+@utility glass-panel {
+  background: var(--panel-bg);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid var(--panel-border);
+  box-shadow:
+    inset 0 1px 0 var(--panel-highlight),
+    var(--panel-shadow);
+}
+
+/* Denser glass for things floating over content (headers, menus) */
+@utility glass-strong {
+  background: var(--panel-bg-strong);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid var(--panel-border);
+  box-shadow:
+    inset 0 1px 0 var(--panel-highlight),
+    var(--panel-shadow);
+}
+
+@utility glow-primary {
+  box-shadow:
+    0 10px 30px -8px color-mix(in srgb, var(--primary) 70%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* Thin themed scrollbars for independently scrolling panels */
+@utility panel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+
+/* Email verification illustration (app/(auth)/verify-email) */
+@keyframes verify-ring {
+  0% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="verify-ring"] {
+    animation: none !important;
+  }
+}
+
+/* Ambient backdrop behind the desktop glass panels */
+@keyframes ambient-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, 4%, 0) scale(1.08);
+  }
+}
+
+/* Transaction success (TransactionSuccessScreen) */
+@keyframes tx-glow {
+  from {
+    transform: scale(0.1);
+    opacity: 0.65;
+  }
+}
+@keyframes tx-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+@keyframes tx-rise {
+  from {
+    transform: translateY(32px);
+    opacity: 0;
+  }
+}
+@keyframes tx-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

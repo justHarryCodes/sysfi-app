@@ -1,0 +1,40 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test:crypto": "node scripts/verify-wallet-crypto.mjs",
+    "test": "node --import ./test/register.mjs --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@noble/ciphers": "2.4.0",
+    "@noble/curves": "2.4.0",
+    "@noble/hashes": "2.4.0",
+    "@rainbow-me/rainbowkit": "2.2.11",
+    "@scure/bip39": "2.4.0",
+    "@tanstack/query-persist-client-core": "5.104.1",
+    "@tanstack/react-query": "5.104.1",
+    "crypto-js": "4.2.0",
+    "ethers": "6.17.0",
+    "firebase": "12.19.0",
+    "idb": "8.0.3",
+    "lightweight-charts": "5.2.1",
+    "next": "16.3.8",
+    "qrcode.react": "4.2.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-icons": "5.7.0",
+    "viem": "2.57.3",
+    "wagmi": "2.19.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.8",
+    "tailwindcss": "^4"
+  }
+}
