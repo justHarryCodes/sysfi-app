@@ -14,6 +14,11 @@ export const APP_CONFIG = {
 
 /** Optional. Only a fallback for slow public RPCs + the alchemy_* indexer APIs. */
 export const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_KEY || "";
+/**
+ * Optional: (chainId, jsonRpcList) → responses, for alchemy_* calls when this
+ * client has no key (backend /chain/:id/indexer). The web uses its own key.
+ */
+export const indexerProxy = null;
 export const alchemyUrl = (chain) => (ALCHEMY_KEY && chain?.alchemy ? `https://${chain.alchemy}.g.alchemy.com/v2/${ALCHEMY_KEY}` : null);
 
 /** EIP-7528 sentinel the app and backend use for the native token. */

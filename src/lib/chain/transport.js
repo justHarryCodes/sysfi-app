@@ -1,10 +1,10 @@
-// lib/chain/transport.js — public RPCs first, Alchemy only when they're slow
-// or failing. An ethers JsonRpcProvider whose `_send` (the documented
-// override point) spreads requests over a chain's endpoints:
+// lib/chain/transport.js — public RPCs first, Alchemy as the last resort.
+// An ethers JsonRpcProvider whose `_send` (the documented override point)
+// spreads requests over a chain's endpoints:
 //
 //   reads    healthiest public endpoint; if it hasn't answered within
-//            HEDGE_MS, race the fallback (Alchemy, else the next public
-//            node) and take whichever answers first
+//            HEDGE_MS, race the next public node, and so on — Alchemy joins
+//            only after every public node has been tried
 //   failures network errors, HTTP 429/5xx and rate-limit JSON-RPC errors
 //            put the endpoint in a cooldown and move to the next one.
 //            Contract errors (reverts, insufficient funds) are real answers
@@ -12,9 +12,11 @@
 //   writes   eth_sendRawTransaction is never raced — it fails over only on
 //            transport errors, and "already known" from a second node
 //            counts as success
-//   alchemy_* indexer methods go to Alchemy only
+//   alchemy_* indexer methods go to the backend's indexer proxy first
+//            (config's indexerProxy, when the platform has one), and to
+//            Alchemy directly with this client's key only if that fails
 import { JsonRpcProvider, Network, keccak256 } from "ethers";
-import { alchemyUrl } from "@/lib/config";
+import { alchemyUrl, indexerProxy } from "@/lib/config";
 
 const HEDGE_MS = 2500; // "too much delay" before the fallback joins in
 const ATTEMPT_TIMEOUT_MS = 10_000;
@@ -55,6 +57,7 @@ class TransportError extends Error {
 export class ResilientProvider extends JsonRpcProvider {
   #endpoints;
   #alchemy;
+  #proxy;
 
   constructor(chain) {
     const network = Network.from(chain.id);
@@ -64,12 +67,13 @@ export class ResilientProvider extends JsonRpcProvider {
     super(publics[0] ?? alchemy, network, { staticNetwork: network, batchMaxCount: 10, batchStallTime: 8 });
     this.#endpoints = publics.map((url) => ({ url, kind: "public", fails: 0, until: 0, ms: 800 }));
     this.#alchemy = alchemy ? { url: alchemy, kind: "alchemy", fails: 0, until: 0, ms: 800 } : null;
+    this.#proxy = chain.alchemy && typeof indexerProxy === "function" ? indexerProxy : null;
     this.chainConfig = chain;
   }
 
   /** True when alchemy_* indexer methods are available on this chain. */
   get hasIndexer() {
-    return !!this.#alchemy;
+    return !!(this.#alchemy || this.#proxy);
   }
 
   /** Public endpoints that aren't cooling down, fastest first; then the rest. */
@@ -189,16 +193,29 @@ export class ResilientProvider extends JsonRpcProvider {
     return list.map((p) => byId.get(p.id) ?? { id: p.id, jsonrpc: "2.0", error: { code: -32603, message: "missing response" } });
   }
 
-  #sendIndexer(payload) {
-    if (!this.#alchemy) throw Object.assign(new Error(`No indexer for ${this.chainConfig.name}`), { code: "NO_INDEXER" });
-    return this.#post(this.#alchemy, payload, new AbortController().signal);
+  async #sendIndexer(payload) {
+    if (this.#proxy) {
+      try {
+        const list = Array.isArray(payload) ? payload : [payload];
+        const out = await this.#proxy(this.chainConfig.id, list);
+        return Array.isArray(out) ? out : [out];
+      } catch (err) {
+        if (!this.#alchemy) throw err; // no last resort
+      }
+    }
+    if (this.#alchemy) return this.#post(this.#alchemy, payload, new AbortController().signal);
+    throw Object.assign(new Error(`No indexer for ${this.chainConfig.name}`), { code: "NO_INDEXER" });
   }
 
   #sendPublic(list, payload) {
     const publics = this.#ranked();
-    // Fallback order: Alchemy right after the best public node (it's the
-    // reliable one), then the remaining public nodes.
-    const order = this.#alchemy ? [publics[0], this.#alchemy, ...publics.slice(1)].filter(Boolean) : publics;
+    // Every healthy public node first (fastest first); Alchemy only after
+    // they've all been slow or failed — but before public nodes that are
+    // already cooling down from failures, which would just add delay.
+    const now = Date.now();
+    const order = this.#alchemy
+      ? [...publics.filter((e) => e.until <= now), this.#alchemy, ...publics.filter((e) => e.until > now)]
+      : publics;
     if (!order.length) throw Object.assign(new Error(`No RPC configured for ${this.chainConfig.name}`), { code: "NO_RPC" });
     if (list.some((p) => p.method === "eth_sendRawTransaction")) return this.#sendRaw(order, list);
     return this.#hedged(order, payload);

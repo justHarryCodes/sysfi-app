@@ -17,6 +17,8 @@
 
 const ETH_LOGO = "https://assets.coingecko.com/coins/images/279/small/ethereum.png";
 const icon = (name) => `https://icons.llamao.fi/icons/chains/rsz_${name}.jpg`;
+/** Our own Base logo (web/public/chains/base.png = crypto-wallet/assets/base.png). */
+export const BASE_LOGO = "/chains/base.png";
 const ether = { name: "Ether", symbol: "ETH", decimals: 18 };
 
 export const IS_PROD = process.env.NODE_ENV === "production";
@@ -66,7 +68,7 @@ const MAINNETS = [
     nativeCurrency: ether,
     nativeLogo: ETH_LOGO,
     coingeckoId: "ethereum",
-    icon: icon("base"),
+    icon: BASE_LOGO,
     explorer: "https://basescan.org",
     rpcs: ["https://mainnet.base.org", "https://base-rpc.publicnode.com"],
     alchemy: "base-mainnet",
