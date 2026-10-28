@@ -27,6 +27,8 @@ import { useWallet } from "@/contexts/WalletContext";
 import { normaliseFeedPost, useFeed, useMyTribes } from "@/hooks/tribes";
 import { tribeOwner } from "@/lib/tribeApi";
 import { formatAddress } from "@/lib/wallet";
+import { auth } from "@/lib/firebase";
+import { formatJoinedShort, joinedDate } from "@/lib/joined";
 
 const TABS = [
   { id: "posts", label: "Posts", Icon: IoGridOutline },
@@ -61,7 +63,7 @@ export default function ProfilePage() {
     () => (feed.data?.pages.flat() || []).filter((p) => p.userId === user?.uid && !p.isRepost).map((p) => normaliseFeedPost(p)),
     [feed.data, user?.uid],
   );
-  const created = user?.createdAt?.toDate?.() ?? (user?.createdAt ? new Date(user.createdAt) : null);
+  const created = joinedDate(user?.createdAt, auth.currentUser?.metadata?.creationTime);
   const airdrop = Number(user?.networkBalance ?? user?.balance ?? 0);
 
   const copy = async () => {
@@ -108,7 +110,7 @@ export default function ProfilePage() {
             <span className="text-xs text-text-tertiary">Posts</span>
           </button>
           <div className="flex-1 py-3">
-            <span className="block text-lg font-extrabold text-text">{created ? created.toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}</span>
+            <span className="block text-lg font-extrabold text-text">{formatJoinedShort(created) ?? "—"}</span>
             <span className="text-xs text-text-tertiary">Joined</span>
           </div>
         </div>

@@ -5,7 +5,8 @@ import Link from "next/link";
 import {
   IoChatbubbleOutline,
   IoRepeat,
-  IoHappyOutline,
+  IoHeart,
+  IoHeartOutline,
   IoShareOutline,
   IoBarChartOutline,
   IoTrashOutline,
@@ -179,7 +180,7 @@ export default function PostCard({ post, showTribe = false, canDelete = false, o
 
       <div className="mt-1 flex items-center px-2 pb-1">
         <Link href={href} aria-label="Comments" className="flex items-center gap-1.5 rounded-full px-3 py-2.5 text-text-secondary hover:bg-hover hover:text-text">
-          <IoChatbubbleOutline size={18} />
+          <IoChatbubbleOutline size={23} />
           {post.commentsCount > 0 && <span className="text-sm tabular-nums">{formatCount(post.commentsCount)}</span>}
         </Link>
         <button
@@ -189,25 +190,42 @@ export default function PostCard({ post, showTribe = false, canDelete = false, o
           aria-pressed={!!post.hasReposted}
           className={`flex items-center gap-1.5 rounded-full px-3 py-2.5 hover:bg-hover ${post.hasReposted ? "text-primary" : "text-text-secondary hover:text-text"}`}
         >
-          <IoRepeat size={19} />
+          <IoRepeat size={24} />
           {post.repostCount > 0 && <span className="text-sm tabular-nums">{formatCount(post.repostCount)}</span>}
         </button>
+        {/* Like (like Twitter): click to like; right-click / hold for the other reactions */}
         <button
           ref={reactBtn}
           type="button"
-          onClick={requireSignIn(() => setPickerOpen((v) => !v))}
-          aria-label="React"
-          aria-expanded={pickerOpen}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-2.5 hover:bg-hover ${post.myReaction ? "text-primary" : "text-text-secondary hover:text-text"}`}
+          onClick={requireSignIn(() => {
+            setPickerOpen(false);
+            react.mutate({ tribeId: post.guildId, postId: post.id, type: "heart" });
+          })}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            requireSignIn(() => setPickerOpen((v) => !v))();
+          }}
+          aria-label={post.myReaction === "heart" ? "Unlike" : "Like"}
+          aria-pressed={post.myReaction === "heart"}
+          title="Like · right-click for more reactions"
+          className={`flex items-center gap-1.5 rounded-full px-3 py-2.5 hover:bg-hover ${
+            post.myReaction === "heart" ? "text-like" : post.myReaction ? "text-primary" : "text-text-secondary hover:text-like"
+          }`}
         >
-          {myEmoji ? <span className="text-[17px] leading-none">{myEmoji}</span> : <IoHappyOutline size={18} />}
+          {post.myReaction && post.myReaction !== "heart" ? (
+            <span className="text-[22px] leading-none">{myEmoji}</span>
+          ) : post.myReaction === "heart" ? (
+            <IoHeart size={23} />
+          ) : (
+            <IoHeartOutline size={23} />
+          )}
           {totalReactions > 0 && <span className="text-sm tabular-nums">{formatCount(totalReactions)}</span>}
         </button>
         <button type="button" onClick={share} aria-label="Share" className="rounded-full px-3 py-2.5 text-text-secondary hover:bg-hover hover:text-text">
-          {shared ? <IoCheckmark size={18} className="text-primary" /> : <IoShareOutline size={18} />}
+          {shared ? <IoCheckmark size={23} className="text-primary" /> : <IoShareOutline size={23} />}
         </button>
         <span className="ml-auto flex items-center gap-1 px-3 text-xs text-text-tertiary" title="Views">
-          <IoBarChartOutline size={15} />
+          <IoBarChartOutline size={20} />
           {post.impressionCount > 0 && formatCount(post.impressionCount)}
         </span>
       </div>

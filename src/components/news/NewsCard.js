@@ -11,7 +11,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   IoChatbubbleOutline,
-  IoHappyOutline,
+  IoHeart,
+  IoHeartOutline,
   IoShareOutline,
   IoBarChartOutline,
   IoCheckmark,
@@ -99,25 +100,42 @@ export function NewsActions({ card }) {
     <>
       <div className="mt-1 flex items-center px-2 pb-1">
         <Link href={href} aria-label="Comments" className="flex items-center gap-1.5 rounded-full px-3 py-2.5 text-text-secondary hover:bg-hover hover:text-text">
-          <IoChatbubbleOutline size={18} />
+          <IoChatbubbleOutline size={23} />
           {s.commentsCount > 0 && <span className="text-sm tabular-nums">{formatCount(s.commentsCount)}</span>}
         </Link>
+        {/* Like (like Twitter): click to like; right-click / hold for the other reactions */}
         <button
           ref={btn}
           type="button"
-          onClick={requireSignIn(() => setOpen((v) => !v))}
-          aria-label="React"
-          aria-expanded={open}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-2.5 hover:bg-hover ${s.myReaction ? "text-primary" : "text-text-secondary hover:text-text"}`}
+          onClick={requireSignIn(() => {
+            setOpen(false);
+            react.mutate({ key: card.key, type: "heart" });
+          })}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            requireSignIn(() => setOpen((v) => !v))();
+          }}
+          aria-label={s.myReaction === "heart" ? "Unlike" : "Like"}
+          aria-pressed={s.myReaction === "heart"}
+          title="Like · right-click for more reactions"
+          className={`flex items-center gap-1.5 rounded-full px-3 py-2.5 hover:bg-hover ${
+            s.myReaction === "heart" ? "text-like" : s.myReaction ? "text-primary" : "text-text-secondary hover:text-like"
+          }`}
         >
-          {myEmoji ? <span className="text-[17px] leading-none">{myEmoji}</span> : <IoHappyOutline size={18} />}
+          {s.myReaction && s.myReaction !== "heart" ? (
+            <span className="text-[22px] leading-none">{myEmoji}</span>
+          ) : s.myReaction === "heart" ? (
+            <IoHeart size={23} />
+          ) : (
+            <IoHeartOutline size={23} />
+          )}
           {total > 0 && <span className="text-sm tabular-nums">{formatCount(total)}</span>}
         </button>
         <button type="button" onClick={share} aria-label="Share" className="rounded-full px-3 py-2.5 text-text-secondary hover:bg-hover hover:text-text">
-          {shared ? <IoCheckmark size={18} className="text-primary" /> : <IoShareOutline size={18} />}
+          {shared ? <IoCheckmark size={23} className="text-primary" /> : <IoShareOutline size={23} />}
         </button>
         <span className="ml-auto flex items-center gap-1 px-3 text-xs text-text-tertiary" title="Views">
-          <IoBarChartOutline size={15} />
+          <IoBarChartOutline size={20} />
           {s.impressionCount > 0 && formatCount(s.impressionCount)}
         </span>
       </div>

@@ -53,6 +53,7 @@
   /* Market colours — the app theme keeps status colours monochrome, but
      buy/sell, gains/losses and vote options need to read at a glance. */
   --up: #22c55e;
+  --like: #f91880; /* likes (Twitter pink) */
   --down: #f43f5e;
   --neutral: #f59e0b;
   --info: #737373;
@@ -123,6 +124,7 @@
   --error: #000000;
   --warning: #707070;
   --up: #16a34a;
+  --like: #e0136f;
   --down: #e11d48;
   --neutral: #d97706;
   --info: #707070;
@@ -182,6 +184,7 @@
   --color-error: var(--error);
   --color-warning: var(--warning);
   --color-up: var(--up);
+  --color-like: var(--like);
   --color-down: var(--down);
   --color-neutral: var(--neutral);
   --color-info: var(--info);

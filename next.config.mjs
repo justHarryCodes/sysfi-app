@@ -1,3 +1,5 @@
+import path from "node:path";
+
 // wagmi → @wagmi/connectors → @base-org/account → @coinbase/cdp-sdk imports
 // Coinbase's optional x402 payment packages (server-side features never run
 // in a browser wallet connection). They aren't installed, so point them at
@@ -10,6 +12,16 @@ const x402Aliases = Object.fromEntries(
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   turbopack: { resolveAlias: x402Aliases },
+  // `npm run build` uses webpack (--webpack), which needs the same aliases —
+  // as absolute paths, and exact-match ("name$"): a plain "@x402/evm" alias
+  // would also swallow "@x402/evm/exact/client" as a sub-path of the stub.
+  webpack(config) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      ...Object.fromEntries(Object.keys(x402Aliases).map((m) => [`${m}$`, path.resolve(X402_STUB)])),
+    };
+    return config;
+  },
   // URLs of the old Vite site (website/), so shared links keep working.
   async redirects() {
     return [
